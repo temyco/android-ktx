@@ -1,2 +1,2 @@
 # android-ktx
-Android Kotlin extensions library made by Temyco Android developers.
+Android Kotlin extensions library made by Temy Android developers.
