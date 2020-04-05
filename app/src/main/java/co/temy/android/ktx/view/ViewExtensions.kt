@@ -22,7 +22,6 @@ import androidx.appcompat.view.SupportMenuInflater
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import androidx.core.os.ConfigurationCompat
 import androidx.core.text.getSpans
 import androidx.core.text.toSpannable
 import androidx.core.view.ViewCompat
@@ -406,8 +405,6 @@ fun TextView.setTextAppearanceCompat(appearanceId: Int) {
 /**
  * Returns [Spannable] where the term is
  * highlighted as a bold text.
- *
- * Use it to highlight a search query in the result string.
  */
 fun String.highlightTerm(term: String): SpannableString {
     val regex = Regex(term.toLowerCase())
@@ -424,8 +421,6 @@ fun String.highlightTerm(term: String): SpannableString {
 /**
  * Returns [Spannable] where all <em> (e.g. italic) tags are replaced
  * with <strong> (e.g. bold)
- *
- * Use it to show a search result for /pages response.
  *
  * Important: works only with <em> tags replacing it only with <strong> tags.
  * Using deprecated [Html.fromHtml] as it's deprecated only from API 24.
@@ -458,13 +453,6 @@ fun Array<out StyleSpan>.replaceItalicInSpannable(spannable: SpannableString) = 
 }
 
 fun ActionMenuView.inflateMenu(menuId: Int) = SupportMenuInflater(context).inflate(menuId, menu)
-
-fun Intent.getNullableIntExtra(name: String, default: Int? = null): Int? {
-    val extra = getIntExtra(name, -1)
-    return if (extra == -1) default else extra
-}
-
-fun Context.currentLanguage() = ConfigurationCompat.getLocales(resources.configuration)[0].language
 
 fun Window.disableScreenshots() {
     this.setFlags(

@@ -16,6 +16,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
@@ -141,3 +142,5 @@ fun Activity.openGooglePlaySubscriptions() {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uriString))
     startActivity(intent)
 }
+
+fun Context.currentLanguage() = ConfigurationCompat.getLocales(resources.configuration)[0].language
