@@ -1,4 +1,4 @@
-package co.temy.android.ktx.crypto
+package co.temy.android.ktx
 
 import android.util.Base64
 import java.security.Key

@@ -1,39 +1,29 @@
-package co.temy.android.ktx.view
+package co.temy.android.ktx
 
 import android.content.Context
-import android.content.Intent
-import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.Typeface
-import android.net.Uri
-import android.text.*
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
-import android.text.style.ClickableSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.util.DisplayMetrics
-import android.view.*
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
-import androidx.appcompat.view.SupportMenuInflater
-import androidx.appcompat.widget.ActionMenuView
+import android.widget.AutoCompleteTextView
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.content.ContextCompat
-import androidx.core.text.getSpans
 import androidx.core.text.toSpannable
 import androidx.core.view.ViewCompat
 import androidx.core.view.children
 import androidx.core.view.doOnPreDraw
 import androidx.core.widget.TextViewCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import kotlin.math.min
 
 fun EditText.value() = text.toString()
 
@@ -73,24 +63,6 @@ fun View.hideKeyboard() {
     this.clearFocus()
 }
 
-fun Fragment.showKeyboard() {
-    val imm: InputMethodManager? = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-    imm?.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
-}
-
-fun Fragment.hideKeyboard() {
-    val view = view?.findFocus() ?: return
-    val imm: InputMethodManager? = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-    imm?.hideSoftInputFromWindow(view.windowToken, 0)
-    view.clearFocus()
-}
-
-fun Context.openBrowser(url: String, clearFromRecent: Boolean = true) {
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-    browserIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    if (clearFromRecent) browserIntent.flags = browserIntent.flags or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-    startActivity(browserIntent)
-}
 
 /**
  * @return [View.VISIBLE] if Boolean value is true, [View.GONE] otherwise.
@@ -238,14 +210,6 @@ fun View.setBottomPadding(bottomPadding: Int) {
     setPadding(paddingLeft, paddingTop, paddingRight, bottomPadding)
 }
 
-fun Context.inflate(resource: Int, root: ViewGroup? = null, attachToRoot: Boolean = false): View {
-    return LayoutInflater.from(this).inflate(resource, root, attachToRoot)
-}
-
-fun Context.getColorCompat(@ColorRes color: Int) = ContextCompat.getColor(this, color)
-
-fun Context.getDrawableCompat(@DrawableRes drawable: Int) = ContextCompat.getDrawable(this, drawable)
-
 /**
  * Triggers when recycler view state changes to [RecyclerView.SCROLL_STATE_IDLE].
  */
@@ -257,45 +221,6 @@ inline fun RecyclerView.addOnIdleStateListener(crossinline listener: (RecyclerVi
             }
         }
     })
-}
-
-/**
- * Converts value in pixels into value in device-independent pixels
- */
-fun Int.toDp(): Int {
-    val metrics = Resources.getSystem().displayMetrics
-    return this / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
-}
-
-/**
- * Converts value in device-independent pixels into value in pixels
- */
-fun Int.toPx(): Int {
-    val metrics = Resources.getSystem().displayMetrics
-    return this * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
-}
-
-fun ViewGroup.LayoutParams.calculateAspectRatio(
-    maxWidth: Float,
-    maxHeight: Float,
-    imageWidth: Float,
-    imageHeight: Float
-): ViewGroup.LayoutParams = apply {
-    val widthRatio = maxWidth / imageWidth
-    val heightRatio = maxHeight / imageHeight
-    val bestRatio = min(widthRatio, heightRatio)
-
-    this.width = (imageWidth * bestRatio).toInt()
-    this.height = (imageHeight * bestRatio).toInt()
-}
-
-fun ViewGroup.LayoutParams.calculateProportionalHeight(
-    maxWidth: Float,
-    imageWidth: Float,
-    imageHeight: Float
-): ViewGroup.LayoutParams = apply {
-    val aspectRatio = maxWidth / imageWidth
-    this.height = (imageHeight * aspectRatio).toInt()
 }
 
 fun View.setProportionalHeight(imageWidth: Float, imageHeight: Float) {
@@ -359,29 +284,6 @@ fun CheckBox.attachLiveData(data: MutableLiveData<Boolean>) {
     }
 }
 
-/**
- * Attaches Live data to Radio Group.
- * This will update Live Data data with selected radio button text.
- */
-fun RadioGroup.attachLiveDataForValue(data: MutableLiveData<String>) {
-    data.value = getCheckedView()?.text.toString()
-    setOnCheckedChangeListener { group, checkedId ->
-        val checkedView = group.findViewById<RadioButton>(checkedId)
-        data.value = checkedView.text.toString()
-    }
-}
-
-/**
- * Attaches Live data to Radio Group.
- * This will update Live Data data with selected radio button text.
- */
-fun RadioGroup.attachLiveDataForId(data: MutableLiveData<Int>) {
-    data.value = checkedRadioButtonId
-    setOnCheckedChangeListener { group, checkedId ->
-        data.value = checkedId
-    }
-}
-
 inline fun EditText.addTextChangedListener(crossinline onTextChanged: (text: CharSequence?) -> Unit) {
     addTextChangedListener(object : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
@@ -396,63 +298,9 @@ inline fun EditText.addTextChangedListener(crossinline onTextChanged: (text: Cha
     })
 }
 
-fun RadioGroup.getCheckedView() = findViewById<RadioButton>(checkedRadioButtonId) ?: null
-
 fun TextView.setTextAppearanceCompat(appearanceId: Int) {
     TextViewCompat.setTextAppearance(this, appearanceId)
 }
-
-/**
- * Returns [Spannable] where the term is
- * highlighted as a bold text.
- */
-fun String.highlightTerm(term: String): SpannableString {
-    val regex = Regex(term.toLowerCase())
-    val matches = regex.findAll(this.toLowerCase())
-    val ranges = matches.map { it.range }
-    val spannable = SpannableString(this)
-    ranges.forEach {
-        spannable.setSpan(ForegroundColorSpan(Color.BLACK), it.start, it.endInclusive + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-
-    return spannable
-}
-
-/**
- * Returns [Spannable] where all <em> (e.g. italic) tags are replaced
- * with <strong> (e.g. bold)
- *
- * Important: works only with <em> tags replacing it only with <strong> tags.
- * Using deprecated [Html.fromHtml] as it's deprecated only from API 24.
- */
-fun String.replaceItalicWithBold(): SpannableString {
-    val spannable = SpannableString(Html.fromHtml(this))
-
-    spannable.getSpans<StyleSpan>(0, this.lastIndex)
-        .replaceItalicInSpannable(spannable)
-
-    return spannable
-}
-
-fun Array<out StyleSpan>.replaceItalicInSpannable(spannable: SpannableString) = forEach {
-    if (it.style == Typeface.ITALIC) {
-        spannable.setSpan(
-            StyleSpan(Typeface.BOLD),
-            spannable.getSpanStart(it),
-            spannable.getSpanEnd(it),
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        spannable.setSpan(
-            ForegroundColorSpan(Color.BLACK),
-            spannable.getSpanStart(it),
-            spannable.getSpanEnd(it),
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        spannable.removeSpan(it)
-    }
-}
-
-fun ActionMenuView.inflateMenu(menuId: Int) = SupportMenuInflater(context).inflate(menuId, menu)
 
 fun Window.disableScreenshots() {
     this.setFlags(
@@ -472,46 +320,6 @@ fun Snackbar.show(isCentered: Boolean) {
     }
 
     this.show()
-}
-
-fun String.makeTextClickable(clickableText: String, clickableTextColor: Int, clickListener: () -> (Unit)): SpannableString {
-    val regex = Regex(clickableText)
-    val matches = regex.findAll(this)
-    val ranges = matches.map { it.range }
-    val spannable = SpannableString(this)
-    val clickableSpan = object : ClickableSpan() {
-        override fun onClick(widget: View) { clickListener.invoke() }
-
-        override fun updateDrawState(ds: TextPaint) {
-            ds.color = clickableTextColor
-            ds.isUnderlineText = false
-        }
-    }
-    ranges.forEach {
-        spannable.setSpan(clickableSpan, it.first, it.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-
-    return spannable
-}
-
-fun Spannable.makeTextClickable(clickableText: String, clickableTextColor: Int, clickListener: () -> (Unit)): SpannableString {
-    val regex = Regex(clickableText)
-    val matches = regex.findAll(this)
-    val ranges = matches.map { it.range }
-    val spannable = SpannableString(this)
-    val clickableSpan = object : ClickableSpan() {
-        override fun onClick(widget: View) { clickListener.invoke() }
-
-        override fun updateDrawState(ds: TextPaint) {
-            ds.color = clickableTextColor
-            ds.isUnderlineText = false
-        }
-    }
-    ranges.forEach {
-        spannable.setSpan(clickableSpan, it.first, it.last + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-
-    return spannable
 }
 
 /**
