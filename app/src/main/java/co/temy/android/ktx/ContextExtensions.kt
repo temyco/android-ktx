@@ -51,10 +51,10 @@ fun Context.getMiddleScreenY(): Int {
 }
 
 const val SMALLEST_WIDTH_600: Int = 600
-fun Context.createIconWithResourceCompat(@DrawableRes vectorIconId: Int, @DrawableRes adaptiveIconForegroundId: Int, @DrawableRes adaptiveIconBacgroundId: Int): IconCompat {
+fun Context.createIconWithResourceCompat(@DrawableRes vectorIconId: Int, @DrawableRes adaptiveIconForegroundId: Int, @DrawableRes adaptiveIconBackgroundId: Int): IconCompat {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val adaptiveIconDrawable = AdaptiveIconDrawable(
-            ContextCompat.getDrawable(this, adaptiveIconBacgroundId),
+            ContextCompat.getDrawable(this, adaptiveIconBackgroundId),
             ContextCompat.getDrawable(this, adaptiveIconForegroundId)
         )
 
